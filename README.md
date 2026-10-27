@@ -1,3 +1,5 @@
+[![build](https://github.com/matmirr/meeseeksObjetosos/actions/workflows/ci.yml/badge.svg)](https://github.com/matmirr/meeseeksObjetosos/actions/workflows/ci.yml)
+
 # Meeseeks destructores — versión Objetos
 
 > Adaptación del Tema 1 del parcial funcional 2026 para la clase de Elementos de Diseño (M15) e introducción a Strategy. Se omiten el punto 2 y el 4b del original; se conserva la numeración.
