@@ -1,0 +1,192 @@
+import meeseeks.*
+
+describe "Color que merece un Meeseeks" {
+
+  test "Un Meeseeks recién salido con nombre de longitud par merece celeste" {
+    const meeseeks = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 0)
+    assert.equals(celeste, meeseeks.colorQueMerece())
+  }
+
+  test "Un Meeseeks recién salido con nombre de longitud impar merece el color por defecto (negro)" {
+    const meeseeks = new Meeseeks(nombre = "Mr. Meeseeks Jr", tareaActual = "abrir un frasco", horasDeExistencia = 0.5)
+    assert.equals(negro, meeseeks.colorQueMerece())
+  }
+
+  test "Con exactamente 1 hora un Meeseeks merece azul" {
+    const meeseeks = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 1)
+    assert.equals(azul, meeseeks.colorQueMerece())
+  }
+
+  test "Con exactamente 5 horas un Meeseeks merece azul" {
+    const meeseeks = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 5)
+    assert.equals(azul, meeseeks.colorQueMerece())
+  }
+
+  test "Apenas pasadas las 5 horas un Meeseeks merece violeta" {
+    const meeseeks = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 5.5)
+    assert.equals(violeta, meeseeks.colorQueMerece())
+  }
+
+  test "Con exactamente 24 horas un Meeseeks merece violeta" {
+    const meeseeks = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 24)
+    assert.equals(violeta, meeseeks.colorQueMerece())
+  }
+
+  test "Pasadas las 24 horas un Meeseeks merece negro" {
+    const meeseeks = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 25)
+    assert.equals(negro, meeseeks.colorQueMerece())
+  }
+}
+
+describe "Sufrimiento de un Meeseeks" {
+
+  test "Un Meeseeks con el color que merece y sin golf en su tarea no sufre" {
+    const meeseeks = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 3, color = azul)
+    assert.notThat(meeseeks.estaSufriendo())
+  }
+
+  test "Un Meeseeks con un color distinto al que merece sufre" {
+    const meeseeks = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 30, color = azul)
+    assert.that(meeseeks.estaSufriendo())
+  }
+
+  test "Un Meeseeks con golf en su tarea sufre aunque tenga el color que merece" {
+    assert.that(meeseeksDeJerry.estaSufriendo())
+  }
+}
+
+describe "Interacciones con un Meeseeks" {
+
+  const meeseeks = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 3, color = azul)
+
+  test "Pedirle ayuda le suma una hora y le cambia la tarea" {
+    meeseeks.pedirAyuda("buscar el control remoto")
+    assert.equals(4, meeseeks.horasDeExistencia())
+    assert.equals("buscar el control remoto", meeseeks.tareaActual())
+  }
+
+  test "Golpearlo lo enoja y le duplica las horas" {
+    meeseeks.golpear()
+    assert.equals("Mr. Meeseeks (enojado)", meeseeks.nombre())
+    assert.equals(6, meeseeks.horasDeExistencia())
+  }
+
+  test "Golpear a un Meeseeks sin horas lo deja con 1 hora" {
+    const recienSalido = new Meeseeks(tareaActual = "abrir un frasco")
+    recienSalido.golpear()
+    assert.equals(1, recienSalido.horasDeExistencia())
+  }
+
+  test "Golpear a un Meeseeks con menos de una hora igual le duplica las horas" {
+    const casiRecienSalido = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 0.3)
+    casiRecienSalido.golpear()
+    assert.equals(0.6, casiRecienSalido.horasDeExistencia())
+  }
+
+  test "Agradecerle registra el intento y reinicia horas y tarea" {
+    meeseeks.agradecer()
+    assert.equals(1, meeseeks.cantidadDeIntentos())
+    assert.equals("abrir un frasco", meeseeks.ultimoIntento().descripcion())
+    assert.equals(3, meeseeks.ultimoIntento().horas())
+    assert.equals(0, meeseeks.horasDeExistencia())
+    assert.equals("ninguna", meeseeks.tareaActual())
+  }
+
+  test "Frustrarse equivale a ser golpeado dos veces" {
+    meeseeks.frustrarse()
+    assert.equals("Mr. Meeseeks (enojado) (enojado)", meeseeks.nombre())
+    assert.equals(12, meeseeks.horasDeExistencia())
+  }
+}
+
+describe "Caja de Meeseeks y castigos" {
+
+  const tranquilo = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 3, color = azul)
+  const otroTranquilo = new Meeseeks(tareaActual = "pasar la aspiradora", horasDeExistencia = 2, color = azul)
+  const caja = new Caja(meeseeks = #{tranquilo, otroTranquilo}, castigos = [golpe])
+
+  test "Apretar el botón aplica los castigos a todos los Meeseeks de la caja" {
+    caja.apretarBoton()
+    assert.equals(6, tranquilo.horasDeExistencia())
+    assert.equals(4, otroTranquilo.horasDeExistencia())
+  }
+
+  test "Los castigos se aplican a cada Meeseeks en orden" {
+    caja.castigos([new PedidoDeAyuda(tarea = "limpiar el sótano"), golpe])
+    caja.apretarBoton()
+    assert.equals(8, tranquilo.horasDeExistencia())
+    assert.equals("limpiar el sótano", tranquilo.tareaActual())
+  }
+
+  test "Cambiar los castigos cambia lo que hace el botón de la misma caja" {
+    caja.castigos([agradecimiento])
+    caja.apretarBoton()
+    assert.equals(0, tranquilo.horasDeExistencia())
+    assert.equals(1, tranquilo.cantidadDeIntentos())
+  }
+
+  test "Con el criterio habitual, apretar hasta colapsar deja a todos los Meeseeks sufriendo" {
+    caja.apretarHastaColapsar()
+    assert.that(caja.colapso())
+  }
+
+  test "Aunque la caja ya esté colapsada, el botón se aprieta al menos una vez" {
+    const sufrido = new Meeseeks(tareaActual = "practicar golf", horasDeExistencia = 3, color = azul)
+    const cajaColapsada = new Caja(meeseeks = #{sufrido}, castigos = [golpe])
+    cajaColapsada.apretarHastaColapsar()
+    assert.equals(6, sufrido.horasDeExistencia())
+  }
+}
+
+describe "Criterio de colapso de una caja" {
+
+  const golfista = new Meeseeks(tareaActual = "practicar golf", horasDeExistencia = 3, color = azul)
+  const otroGolfista = new Meeseeks(tareaActual = "mirar golf", horasDeExistencia = 2, color = azul)
+  const tranquilo = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 3, color = azul)
+
+  test "Por defecto, una caja con algún Meeseeks sin sufrir no está colapsada" {
+    const caja = new Caja(meeseeks = #{golfista, otroGolfista, tranquilo}, castigos = [golpe])
+    assert.notThat(caja.colapso())
+  }
+
+  test "Por defecto, una caja en la que todos sufren está colapsada" {
+    const caja = new Caja(meeseeks = #{golfista, otroGolfista}, castigos = [golpe])
+    assert.that(caja.colapso())
+  }
+
+  test "Con el criterio de mayoría, una caja en la que sufre más de la mitad está colapsada" {
+    const caja = new Caja(meeseeks = #{golfista, otroGolfista, tranquilo}, castigos = [golpe], criterioDeColapso = mayoriaSufriendo)
+    assert.that(caja.colapso())
+  }
+
+  test "Con el criterio de mayoría, que sufra exactamente la mitad no alcanza" {
+    const caja = new Caja(meeseeks = #{golfista, tranquilo}, castigos = [golpe], criterioDeColapso = mayoriaSufriendo)
+    assert.notThat(caja.colapso())
+  }
+
+  test "Con el criterio más sensible, alcanza con que un solo Meeseeks sufra" {
+    const caja = new Caja(meeseeks = #{golfista, tranquilo}, castigos = [golpe], criterioDeColapso = algunoSufriendo)
+    assert.that(caja.colapso())
+  }
+
+  test "Con el criterio más sensible, si nadie sufre la caja no está colapsada" {
+    const otroTranquilo = new Meeseeks(tareaActual = "pasar la aspiradora", horasDeExistencia = 2, color = azul)
+    const caja = new Caja(meeseeks = #{tranquilo, otroTranquilo}, castigos = [golpe], criterioDeColapso = algunoSufriendo)
+    assert.notThat(caja.colapso())
+  }
+
+  test "Cambiar el criterio cambia si la misma caja está colapsada" {
+    const caja = new Caja(meeseeks = #{golfista, otroGolfista, tranquilo}, castigos = [golpe])
+    caja.criterioDeColapso(mayoriaSufriendo)
+    assert.that(caja.colapso())
+  }
+
+  test "Con el criterio de mayoría, apretar hasta colapsar puede terminar con un Meeseeks sin sufrir" {
+    const nacidoNegro = new Meeseeks(tareaActual = "abrir un frasco", horasDeExistencia = 20, color = negro)
+    const recienSalido = new Meeseeks(tareaActual = "abrir un frasco")
+    const caja = new Caja(meeseeks = #{nacidoNegro, recienSalido, golfista}, castigos = [golpe], criterioDeColapso = mayoriaSufriendo)
+    caja.apretarHastaColapsar()
+    assert.that(caja.colapso())
+    assert.notThat(nacidoNegro.estaSufriendo())
+  }
+}
